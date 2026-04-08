@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xerox Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #f4f7fb;
+  color: #1a1a1a;
+}
+
+.page {
+  position: absolute;
+  width: 100%;
+  min-height: 100vh;
+  transition: all 0.5s ease;
+}
+
+.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.container {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+h1 { color: #2c3e50; }
+h2 { color: #34495e; }
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 380px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+
+button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+button:hover { background: #1e4ed8; }
+
+input {
+  padding: 12px;
+  width: 80%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+img {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.qr {
+  max-width: 200px;
+}
+</style>
+</head>
+<body>
+
+<div class="page active" id="home">
+  <div class="container">
+    <h1>English Textbook Xerox</h1>
+    <p>Simple • Fast • Affordable</p>
+    <input type="text" id="name" placeholder="Enter your name">
+    <br>
+    <button onclick="goNext()">Continue</button>
+  </div>
+</div>
+
+<div class="page hidden" id="options">
+  <div class="container">
+    <h2>Select Format</h2>
+    <div class="card">
+      <h3>A4 Sheets - ₹46</h3>
+      <button onclick="selectOption('A4')">View</button>
+    </div>
+    <div class="card">
+      <h3>Booklet (A5) - ₹72</h3>
+      <button onclick="selectOption('A5')">View</button>
+    </div>
+  </div>
+</div>
+
+<div class="page hidden" id="preview">
+  <div class="container">
+    <h2 id="title"></h2>
+    <img id="sampleImg" src="">
+    <button onclick="printOption()">Proceed to Payment</button>
+  </div>
+</div>
+
+<div class="page hidden" id="payment">
+  <div class="container">
+    <h2>Scan & Pay</h2>
+    <img id="qr" class="qr" src="">
+    <p>After payment, send screenshot via WhatsApp</p>
+    <button onclick="sendWhatsApp()">Send on WhatsApp</button>
+  </div>
+</div>
+
+<script>
+let selected = "";
+let userName = "";
+
+const sheetURL = "https://script.google.com/macros/s/AKfycbyz4gLa9LasbDlTO4pzkWzkflM9KOLt2pPIVzh_uQJhX30p41jVTioZ6prBMP4uBEC2uA/exec";
+
+function showPage(current, next) {
+  document.getElementById(current).classList.remove('active');
+  document.getElementById(current).classList.add('hidden');
+
+  document.getElementById(next).classList.remove('hidden');
+  document.getElementById(next).classList.add('active');
+}
+
+function goNext() {
+  userName = document.getElementById('name').value;
+  if(userName === "") {
+    alert("Please enter your name");
+    return;
+  }
+  showPage('home', 'options');
+}
+
+function selectOption(type) {
+  selected = type;
+  showPage('options', 'preview');
+
+  if(type === 'A4') {
+    document.getElementById('title').innerText = "A4 Format (₹46)";
+    document.getElementById('sampleImg').src = "images/a4.jpg";
+  } else {
+    document.getElementById('title').innerText = "Booklet Format (₹72)";
+    document.getElementById('sampleImg').src = "images/a5.jpg";
+  }
+}
+
+function printOption() {
+  showPage('preview', 'payment');
+
+  if(selected === 'A4') {
+    document.getElementById('qr').src = "images/a4qr.png";
+  } else {
+    document.getElementById('qr').src = "images/a5qr.png";
+  }
+
+  saveToSheet();
+}
+
+function saveToSheet() {
+  fetch(sheetURL, {
+    method: "POST",
+    body: JSON.stringify({
+      name: userName,
+      option: selected,
+      time: new Date().toLocaleString(),
+      status: "Pending"
+    })
+  });
+}
+
+function sendWhatsApp() {
+  let msg = `Name: ${userName}%0AOrder: ${selected}%0AStatus: Paid`;
+  window.open(`https://wa.me/917975918692?text=${msg}`, '_blank');
+}
+</script>
+
+</body>
+</html>
