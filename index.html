@@ -51,7 +51,26 @@ img{max-width:250px;margin-top:10px;border-radius:10px}
 <button onclick="cod()">Cash on Delivery</button>
 <button class="back" onclick="showPage('payment','preview')">Back</button>
 </div></div>
+<div class="page hidden" id="upiPage">
+  <div class="container">
+    <h2>Pay using UPI</h2>
 
+    <p>Copy this number to pay:</p>
+    <h3 id="upiNumber">7975918692</h3>
+
+    <button onclick="copyUPI()">Copy Number</button>
+
+    <br>
+
+    <button onclick="openUPI()">Open Payment App</button>
+
+    <br><br>
+
+    <button type="button" onclick="goUpload()">I Have Paid</button>
+
+    <button class="back" onclick="showPage('upiPage','payment')">Back</button>
+  </div>
+</div>
 <div class="page hidden" id="qrPage"><div class="container">
 <h2>Scan QR</h2>
 <img id="qrImg">
@@ -77,11 +96,18 @@ img{max-width:250px;margin-top:10px;border-radius:10px}
 let name="",option="",payment="",imageURL="";
 const sheetURL="https://script.google.com/macros/s/AKfycbzcWYeJBj7YllsEaES4Xp1SzzEklZG_xyfg9xba9ZhrHr7QAUDAtdH2UbySRf9BJP-w/exec";
 
-function showPage(c,n){
- document.getElementById(c).classList.remove('active');
- document.getElementById(c).classList.add('hidden');
- document.getElementById(n).classList.remove('hidden');
- document.getElementById(n).classList.add('active');
+function showPage(current, next) {
+
+  // Hide ALL pages first
+  let pages = document.querySelectorAll('.page');
+  pages.forEach(p => {
+    p.classList.remove('active');
+    p.classList.add('hidden');
+  });
+
+  // Show ONLY the next page
+  document.getElementById(next).classList.remove('hidden');
+  document.getElementById(next).classList.add('active');
 }
 
 function nextHome(){
@@ -107,11 +133,8 @@ function scanPay(){
 }
 
 function upiPay(){
- payment="UPI";
- let upiLink = option=='A4'
- ? "upi://pay?pa=7975918692@upi&pn=Xerox&am=46&cu=INR"
- : "upi://pay?pa=7975918692@upi&pn=Xerox&am=72&cu=INR";
- window.location.href = upiLink;
+payment = "UPI";
+  showPage('payment','upiPage');
 }
 
 function cod(){
@@ -119,7 +142,9 @@ function cod(){
  finishDirect();
 }
 
-function goUpload(){ showPage('qrPage','upload'); }
+function goUpload() {
+  showPage('upiPage', 'upload');
+}
 
 function submitOrder(){
  let file = document.getElementById('file').files[0];
@@ -176,8 +201,16 @@ function sendWhatsApp(){
  let msg=`Name:${name}%0AOption:${option}%0APayment:${payment}%0AScreenshot:${imageURL}`;
  window.open(`https://wa.me/917975918692?text=${msg}`);
 }
+function copyUPI() {
+  navigator.clipboard.writeText("7975918692");
+  alert("UPI number copied!");
+}
+
+function openUPI() {
+  // This just opens UPI apps (no payment link)
+  window.location.href = "upi://pay";
+}
 </script>
 
 </body>
 </html>
-
